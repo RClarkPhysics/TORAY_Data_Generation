@@ -1,0 +1,32 @@
+## Running a Basic TORAY
+
+TORAY = OMFIT['TORAY']
+
+#Other Options Includ:
+#Scan Time
+#Time dependent critical ne
+#ne scan
+#angle scan
+TORAY['SETTINGS']['SETUP']['runType'] = 'Standard toray run'
+
+#Should keep this as DIII-D
+TORAY['SETTINGS']['EXPERIMENT']['device'] = 'DIII-D'
+
+#Choose a Shot Number
+Shot = 155542
+TORAY['SETTINGS']['EXPERIMENT']['shot'] = Shot
+
+#Choose Input Data
+TORAY['SETTINGS']['PHYSICS']['inputDATA'] = 'ZIPFITs'
+
+#EFIT Type
+TORAY['SETTINGS']['PHYSICS']['EFIT_type'] = 'EFIT01'
+
+#Choose an available time
+TORAY['SETTINGS']['EXPERIMENT']['time'] = 4005
+
+#Run the Setup profiles and equilibrium function
+TORAY['SCRIPTS']['generate_profiles'].run()
+
+#Fetch the GyrotronData
+TORAY['SCRIPTS']['fetchGyrotronsData'].run()
