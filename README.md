@@ -9,7 +9,7 @@ Works in Progress:
 * ne and te sweeping script
 * Output description
 * Description of how TORAY works
-* The meaning of the angles
+* The physical meaning of the toroidal and poloidal angles as well as suggestions for what their values should be.
 
 # Getting started:
 
