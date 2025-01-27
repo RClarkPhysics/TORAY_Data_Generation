@@ -5,6 +5,7 @@ This Repository serves as a guide for running TORAY in OMFIT over many iteration
 
 Works in Progress:
 * Automation of time slice (this is shot dependent, need to find the source so user input isn't required)
+* Automation of shots (The current Script only permits one shot at a time)
 * ne and te sweeping script
 * Output description
 * Description of how TORAY works
