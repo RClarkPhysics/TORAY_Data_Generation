@@ -8,12 +8,12 @@ Works in Progress:
 * ne and te sweeping script
 * Output description
 * Description of how TORAY works
+* The meaning of the angles
 
 # Getting started:
 
 * Have access to General Atomics Servers to access OMFIT.
-* Don't run endless iterations of TORAY in the login node, use a worker node with the following command:
-  * Looking for This
+* Before running extensive programs in the Omega cluster, it is proper ettiquite to connect to a worker node to run projects. Fortunately, OMFIT is wrapped in an srun command that automatically runs OMFIT projects on one of four worker nodes. More info: https://fusionga.sharepoint.com/sites/Computing/SitePages/Omega.aspx
 * Boot up OMFIT with the following commands:
   * module load omfit
   * omfit
