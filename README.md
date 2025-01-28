@@ -4,8 +4,6 @@
 This Repository serves as a guide for running TORAY in OMFIT over many iterations to generate data for a surrogate model. Each script is written such that only one gyroton is running at a time. This gyrotron can have it's location, launch angle, frequency, and power customized. The scripts are focussed on doing sweeps of the launch angle (poloidal and toroidal) and scaling the temperature and density profiles of the plasma.
 
 Works in Progress:
-* Automation of time slice (this is shot dependent, need to find the source so user input isn't required)
-* Automation of shots (The current Script only permits one shot at a time)
 * ne and te sweeping script
 * Output description
 * Description of how TORAY works
