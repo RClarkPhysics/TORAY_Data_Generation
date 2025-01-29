@@ -36,9 +36,9 @@ This Repository serves as a guide for running TORAY in OMFIT over many iteration
 * Toroidal Angle
   * Physical Meaning: 
 * Density Scalar
-  * Physical Meaning: 
+  * Physical Meaning: It simply multiplies every value in the density profile, scaling the whole thing by a multiple of the chosen scalar (defaults to 1.0).
 * Temperature Scalar
-  * Physical Meaning: 
+  * Physical Meaning: It simply multiplies every value in the temperature profile, scaling the whole thing by a multiple of the chosen scalar (defaults to 1.0).
 * Time Slice
   * The times that are available in ZIPFIT will vary from shot to shot. This creates an issue where a user could request TORAY runs at a time, say 500 ms, for one shot, but data only exists at 490 ms and 510 ms in another resulting in an error ending data generation. The implemented solution is for the user to request an array of times and the script will find the closest avialable time to those requested times (rounding down when equidistant) (times outside of the ZIPFIT bounds will be discarded as well).
 * Shot Number
