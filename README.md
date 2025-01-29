@@ -15,7 +15,7 @@ This Repository serves as a guide for running TORAY in OMFIT over many iteration
 * Running iterations of TORAY
   * With the chosen script loaded in the command box, there is a designated area at the top of each script for users to select sweeping parameters. Hit "execute" to begin the script.
 * Accessing Results
-  * The Data gets stored in the "DATA_STORAGE" tree, with the naming convection TORAY_ShotNumber_Time_PoloidalAngle(In degrees)_ToroidalAngle (In degrees)
+  * The Data gets stored in the "DATA_STORAGE" tree, with the naming convention TORAY_ShotNumber_Time_PoloidalAngle(In degrees)_ToroidalAngle(In degrees)
   * Note that the Time will be the used time, not the requested time (if the time had to be shifted do to closest data, the title will reflect that and list the used time over the requested one).
 
 # Script Descriptions
