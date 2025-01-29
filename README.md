@@ -21,14 +21,15 @@ This Repository serves as a guide for running TORAY in OMFIT over many iteration
 
 # Script Descriptions
 The scripts can be seen in the SCRIPTS folder of this repo for visibility, but are already in the zip file.
-* USER_Single_Angle_Test.py
-  * This script is to run single simulations of TORAY for different shots, times, and angles.
-* Time_Fitting.py
-  * This script isn't meant for users to edit. It's purpose is to take the requested times for a sweep and find their closest matching time in the ZIPFIT files. It's best to know beforehand what time slices you want, but this isn't practical when sweeping across a large number of shots with different time slice intervals.
 * USER_General_Sweep.py
   * This is the script users will generate data with the most, it is a general purpose sweeper across a set of shots, time slices, poloidal angles, and toroidal angles.
 * USER_Profile_Sweeper.py
   * This script is the same as the general, but it includes additional sweeping tools for the scale ne profile and te profile. The ne_scalar and te_scalar are multiplied to every value in the temperatur and density profile allowing some limited flexibility to modify these profiles.
+* USER_Single_Angle_Test.py
+  * This script is to run single simulations of TORAY for different shots, times, and angles.
+* Time_Fitting.py
+  * This script isn't meant for users to edit. It's purpose is to take the requested times for a sweep and find their closest matching time in the ZIPFIT files. It's best to know beforehand what time slices you want, but this isn't practical when sweeping across a large number of shots with different time slice intervals.
+
 
 
 # Parameter Descriptions
