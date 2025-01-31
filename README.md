@@ -47,7 +47,7 @@ The scripts can be seen in the SCRIPTS folder of this repo for visibility, but a
   * The DIII-D shot that the desnity and temperature profiles will be taken from. Note that TORAY will throw a fit with certain shot numbers if data isn't available for it.
 
 # TORAY Output Description
-TORAY will output a folder for each active gyrotron, in our case just 1, and in that folder is the TORAY result (toray.nc) and the TORBEAM result (torbeam). Our interests are not limited to, but primarily focused on the 'weecrh' and 'currf' items in toray.nc.
+TORAY will output a folder for each active gyrotron, in our case just 1, and in that folder is the TORAY result (toray.nc) and the TORBEAM result (torbeam). Our interests are primarily focused on the 'weecrh' and 'currf' items in toray.nc.
 * 'weecrh'
   * It's described as the RF power density in each bin, per increment power, in other words the amount of power deposited in a defined bin. It has units Watts/cm^3/(incident Watt). The power deposition is caluted by multiplying this data by the power injected into the plasma from the gryotron.
 * 'currf'
