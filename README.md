@@ -34,9 +34,9 @@ The scripts can be seen in the SCRIPTS folder of this repo for visibility, but a
 
 # Parameter Descriptions
 * Poloidal Angle
-  * Physical Meaning: 
+  * Physical Meaning: The poloidal angle determines if the waves will hit the top, midplane, or bottom of the plasma (up/down direction).An input of 90 degrees launches rays straight into the plasma, in a direction parallel to ground.
 * Toroidal Angle
-  * Physical Meaning: 
+  * Physical Meaning: The toroidal angle determines how the waves will enter the plasma (left/right direction). An input of 180 degrees sends the waves straight into the plasma, pointing directly at the inner wall. Lowing the toroidal angle below 180 degrees causes the launcher to send waves in a clockwise direction, rotating about the gyrotron launch point.
 * Density Scalar
   * Physical Meaning: It simply multiplies every value in the density profile, scaling the whole thing by a multiple of the chosen scalar (defaults to 1.0).
 * Temperature Scalar
