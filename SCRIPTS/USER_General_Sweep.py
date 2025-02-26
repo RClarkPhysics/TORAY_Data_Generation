@@ -1,8 +1,9 @@
 ## Shot, Angle, and Time Slice Sweep
 import numpy as np
+from scipy.optimize import curve_fit
 
 #Choose a Shots
-ShotList = np.array([161414,196082])
+ShotList = np.array([161414]) # 161414 200000
 
 #Choose Time Slices for the Shot (times outside of the ZIP fit range will be discarded,
 #and ties within the range will be chosen to be the nearest time with avaialable data)
@@ -14,7 +15,10 @@ tor_angle = np.linspace(180,220,2)
 
 
 #----------NO USER Input Required Below------------------------
-
+def profile_fit(x,x0,width,m):
+    y = (1.-(np.abs(x-x0)/width)**m)
+    y[y<0] = 0.0
+    return y
 
 #--------------------Setup---------------------------------
 #Create DATA_STORAGE Folder if it doesn't already exist
@@ -82,5 +86,37 @@ for ShotNum in ShotList:
                 #Run TORAY
                 OMFIT['TORAY']['SCRIPTS']['run_toray_all_gyrotrons'].run()
 
+                # Make fitting
+                x = OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['xmrho']['data']
+                y = OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['weecrh']['data']
+                y0 = np.max(y)
+                y = y/y0
+                idx = np.where(y>0.0)[0] #taking only non-zero values for fitting
+                p0 = [
+                      x[np.argmax(y)],              # x0
+                      0.5*(x[idx[-1]]-x[idx[0]]),   # half-width
+                      2                             # m - degree
+                     ]
+                popt, pcov = curve_fit(profile_fit, x[idx], y[idx],
+                                       p0=p0, bounds=([0,0.005,1],[1,1,3]),
+                                       maxfev=10000)
+
+                # Collect data
+                x0    = popt[0]  # peak position, [rho]
+                width = popt[1]  # half-width,    [rho]
+                m     = popt[2]  # degree
+                f_abs = OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['tpowde']['data'][-1]
+
+                # plot(x,y*y0)
+                # plot(x,profile_fit(x,*popt)*y0,'r--')
+                
+                
                 #Save the Result
                 OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)] = OMFIT['TORAY']['OUTPUTS'].duplicate()
+                OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)]['FIT'] = {}
+                OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)]['FIT']['f_abs'] = f_abs
+                OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)]['FIT']['y0']    = y0
+                OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)]['FIT']['x0']    = x0
+                OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)]['FIT']['width'] = width
+                OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)]['FIT']['m']     = m
+
