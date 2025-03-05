@@ -1,24 +1,32 @@
 ## Shot, Angle, ne scaling, te scaling and Time Slice Sweep
 import numpy as np
+from scipy.optimize import curve_fit
+import h5py
 
 #Choose a Shots
-ShotList = np.array([161414,196082])
+ShotList = np.array([161414])
 
 #Choose Time Slices for the Shot (times outside of the ZIP fit range will be discarded,
 #and ties within the range will be chosen to be the nearest time with avaialable data)
-Times = np.array([3000])
+Times = np.array([3000.0])
 
 #Choose an array of poloidal and toroidal angles
-pol_angle = np.array([90])
-tor_angle = np.array([180])
+pol_angle = np.linspace(90,150,7)
+tor_angle = np.linspace(130,230,11)
 
 #Choose a scaling for ne and te
-ne_scales = np.array([1.0,1.1,.3])
-te_scales = np.array([1.0,0.9,0.7])
+ne_scales = np.array([0.5,1.0,2.0])
+te_scales = np.array([0.5,1.0,2.0])
+
+# HDF dump
+save_dir = "/home/nurgalievm/toray/scans/"
 
 #----------NO USER Input Required Below------------------------
-
-
+def profile_fit(x,x0,width,m):
+    y = (1.-(np.abs(x-x0)/width)**m)
+    y[y<0] = 0.0
+    return y
+is_failed = False
 #--------------------Setup---------------------------------
 #Create DATA_STORAGE Folder if it doesn't already exist
 if 'DATA_STORAGE' not in OMFIT.keys():
@@ -30,6 +38,9 @@ if 'Variables' not in OMFIT.keys():
 
 #---------------loop over Shots--------------------------------
 for ShotNum in ShotList:
+    # Create hdf5 for dumping
+    h5_file = h5py.File(save_dir+str(ShotNum)+".h5", 'w')
+
     #Prepare Run Time Data
     OMFIT['Variables']['ShotNum'] = ShotNum
     OMFIT['Variables']['times'] = Times
@@ -87,5 +98,76 @@ for ShotNum in ShotList:
                         #Run TORAY
                         OMFIT['TORAY']['SCRIPTS']['run_toray_all_gyrotrons'].run(ne_scale = ne, te_scale = te)
 
+                        # Make fitting
+
+                        try:
+                            x = OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['xmrho']['data']
+                            y = OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['weecrh']['data']
+                            y0 = np.max(y)
+                            y = y/y0
+                            idx = np.where(y>0.0)[0] #taking only non-zero values for fitting
+                            if len(idx) > 1:
+                                p0 = [
+                                      x[np.argmax(y)],              # x0
+                                      0.5*(x[idx[-1]]-x[idx[0]]),   # half-width
+                                      2                             # m - degree
+                                     ]
+                                popt, pcov = curve_fit(profile_fit, x[idx], y[idx],
+                                                       p0=p0, bounds=([0,0.005,1],[1,1,3]),
+                                                       maxfev=10000)
+
+                                # Collect data
+                                x0    = popt[0]  # peak position, [rho]
+                                width = popt[1]  # half-width,    [rho]
+                                m     = popt[2]  # degree
+                                f_abs = OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['tpowde']['data'][-1]
+                            else:
+                                x0 = 0.0
+                                width = 0.2
+                                m = 2.0
+                                f_abs = 0.0
+
+                            is_failed = False
+                            # plot(x,y*y0)
+                            # plot(x,profile_fit(x,*popt)*y0,'r--')
+                        except:
+                            x0 = 0.0
+                            y0 = 0.0
+                            width = 0.2
+                            m = 2.0
+                            f_abs = 0.0
+                            is_failed = True
+
                         #Save the Result
                         OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)+'_'+str(ne)+'_'+str(te)] = OMFIT['TORAY']['OUTPUTS'].duplicate()
+                        OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)+'_'+str(ne)+'_'+str(te)]['FIT'] = {}
+                        OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)+'_'+str(ne)+'_'+str(te)]['FIT']['f_abs'] = f_abs
+                        OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)+'_'+str(ne)+'_'+str(te)]['FIT']['y0'] = y0
+                        OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)+'_'+str(ne)+'_'+str(te)]['FIT']['x0'] = x0
+                        OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)+'_'+str(ne)+'_'+str(te)]['FIT']['width'] = width
+                        OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)+'_'+str(ne)+'_'+str(te)]['FIT']['m'] = m
+
+                        # Dump to h5
+                        source_data = h5_file.create_group("TORAY_"+str(r)+"_"+str(p_degree)+"_"+str(t_degree)+"_"+str(ne)+"_"+str(te))
+                        if not is_failed:
+                            xmrho_dataset  = source_data.create_dataset("xmrho", data=OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['xmrho']['data'], compression="gzip", compression_opts=9)
+                            weecrh_dataset = source_data.create_dataset("weecrh",data=OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['weecrh']['data'],compression="gzip", compression_opts=9)
+                            currf_dataset  = source_data.create_dataset("currf", data=OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['currf']['data'], compression="gzip", compression_opts=9)
+                            tpowde_dataset = source_data.create_dataset("tpowde",data=OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['tpowde']['data'],compression="gzip", compression_opts=9)
+
+                            xmrho_dataset.attrs["units"]  = OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['xmrho']['long_name']
+                            weecrh_dataset.attrs["units"] = OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['weecrh']['units']
+                            currf_dataset.attrs["units"]  = OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['currf']['units']
+                            tpowde_dataset.attrs["units"] = OMFIT['TORAY']['OUTPUTS']['Leia']['toray.nc']['tpowde']['units']
+
+
+
+
+                        fit_data = h5_file.create_group("FIT_"+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)+'_'+str(ne)+'_'+str(te))
+                        for key in OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)+'_'+str(ne)+'_'+str(te)]['FIT'].keys():
+                            key_dataset = fit_data.create_dataset(key, data=OMFIT['DATA_STORAGE']['TORAY_'+str(ShotNum)+'_'+str(r)+'_'+str(p_degree)+'_'+str(t_degree)+'_'+str(ne)+'_'+str(te)]['FIT'][key])
+
+
+
+    h5_file.close()
+
